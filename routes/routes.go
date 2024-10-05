@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"fmt"
     "net/http"
     "strings"
-
+	"strconv"
     "github.com/gin-gonic/gin"
 	"managee/structs"
 )
@@ -37,6 +38,18 @@ func SetupRoutes(r *gin.Engine) {
             "message": "Data received for " + user.Name,
             "email":   user.Email,
             "age":     user.Age,
+        })
+    })
+
+	r.GET("/employee/:e_id/schedule", func(c *gin.Context) {
+		idParam := c.Param("e_id")
+		idUint, _ := strconv.Atoi(idParam)
+		user := structs.Get_user(idUint)
+
+		u_sch := structs.UserSch{UserID: user.ID, Day: structs.Saturday, Week: 4, Year: 2024, StartTime: 12123432, EndTime: 12123432}
+
+        c.JSON(http.StatusOK, gin.H{
+            "message": "Data received for " + fmt.Sprintf("%+v", u_sch),
         })
     })
 
