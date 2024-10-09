@@ -70,9 +70,12 @@ func SetupRoutes(r *gin.Engine) {
 	})
 	r.GET("/employee/:e_id", func(c *gin.Context) {
 		idParam := c.Param("e_id")
-		c.JSON(http.StatusOK, gin.H{
-			"message": idParam,
-		})
+		var employee structs.Employee
+		if err := db.First(&employee, idParam).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		c.JSON(http.StatusOK, employee)
 	})
 
 	r.GET("/employee/:e_id/schedule", func(c *gin.Context) {
