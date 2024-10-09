@@ -3,11 +3,11 @@ package structs
 // User represents a user in the application
 
 type Employee struct {
-	ID      int    `json:"id" binding:"required"`          // Unique identifier
+	ID      int    `json:"id" gorm:"primaryKey"`           // Unique identifier
 	Name    string `json:"name" binding:"required"`        // User's name
 	Email   string `json:"email" binding:"required,email"` // User's email
 	Age     int    `json:"age" binding:"required,min=0"`   // User's age
-	StoreID int
+	StoreID int    `json:"storeid" binding:"required,min=0"`
 }
 
 func GetEmployee(eId int) Employee {
@@ -42,10 +42,15 @@ const (
 
 type EmployeeSchedule struct {
 	StoreID    int
-	EmployeeID int
+	EmployeeID int `gorm:"primaryKey"`
 	Day        DayOfWeek
 	Week       WeekOfYear
 	Year       Year
 	StartTime  int
 	EndTime    int
+}
+
+type StoreSchedule struct {
+	StoreId  int
+	Schedule []EmployeeSchedule
 }
