@@ -1,6 +1,29 @@
 package structs
 
-// User represents a user in the application
+import (
+	"fmt"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+var db *gorm.DB
+
+func init() {
+
+	// User represents a user in the application
+	var connectionString = "host=localhost user=postgres password=postgrespw dbname=your_db port=32769 sslmode=disable"
+
+	// Connect to the database
+	var err error
+	db, err = gorm.Open(postgres.Open(connectionString), &gorm.Config{})
+	if err != nil {
+		fmt.Printf("failed to connect to the database: %v", err)
+		return
+	}
+	db.AutoMigrate(&Employee{})
+	db.AutoMigrate(&EmployeeSchedule{})
+}
 
 type Employee struct {
 	ID      int    `json:"id" gorm:"primaryKey"`           // Unique identifier
@@ -10,14 +33,17 @@ type Employee struct {
 	StoreID int    `json:"storeid" binding:"required,min=0"`
 }
 
-func GetEmployee(eId int) Employee {
-	user := Employee{
-		ID:    eId,
-		Name:  "test user",
-		Email: "test@user.com",
-		Age:   12,
+func (user Employee) CreateEmployee() {
+	db.Create(&user)
+}
+
+func GetEmployee(userId int) (*Employee, string) {
+	var employee Employee
+	if err := db.First(&employee, userId).Error; err != nil {
+		return nil, "User not found"
+
 	}
-	return user
+	return &employee, ""
 }
 
 func (employee Employee) GetSchedule() EmployeeSchedule {
