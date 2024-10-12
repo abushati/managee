@@ -46,11 +46,25 @@ func GetEmployee(userId int) (*Employee, string) {
 	return &employee, ""
 }
 
-// func (employee Employee) GetSchedule() EmployeeSchedule {
-// 	storeId := employee.StoreID
-// 	eId := employee.ID
-// 	return EmployeeSchedule{StoreID: storeId, EmployeeID: eId, Day: Sunday, Week: 3, Year: 2024, StartTime: 1243, EndTime: 2345}
-// }
+func (employee Employee) Schedule(day int, week int, year int) EmployeeSchedule {
+	storeId := employee.StoreID
+	eId := employee.ID
+	var sch EmployeeSchedule
+
+	base := db.Where(&EmployeeSchedule{StoreID: storeId, EmployeeID: eId})
+	if day != 0 {
+		base = base.Where("day = ?", day)
+	}
+	if week != 0 {
+		base = base.Where("week = ?", week)
+	}
+	if year != 0 {
+		base = base.Where("year = ?", year)
+	}
+	base.Find(&sch)
+
+	return sch
+}
 
 type DayOfWeek int
 type WeekOfYear int
@@ -66,21 +80,17 @@ const (
 	Friday
 )
 
-type DaySchedule struct {
-	Day       DayOfWeek
-	Week      WeekOfYear
-	Year      Year
-	StartTime int
-	EndTime   int
-}
-
 type EmployeeSchedule struct {
 	StoreID    int
-	EmployeeID int `gorm:"primaryKey"`
-	Schedule   []DaySchedule
+	EmployeeID int
+	Day        DayOfWeek
+	Week       WeekOfYear
+	Year       Year
+	StartTime  int
+	EndTime    int
 }
 
 type StoreSchedule struct {
-	StoreId          int
-	EmployeSchedules []EmployeeSchedule
+	StoreId           int
+	EmployeeSchedules []EmployeeSchedule
 }

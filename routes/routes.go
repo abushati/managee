@@ -6,7 +6,6 @@ import (
 	"managee/structs"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,12 +43,10 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/employee/:e_id/schedule", func(c *gin.Context) {
 		idParam := c.Param("e_id")
-		currentTime := time.Now()
-		year, week := currentTime.ISOWeek()
 
-		dayQ := c.DefaultQuery("day", strconv.Itoa(int(currentTime.Day())))
-		weekQ := c.DefaultQuery("week", strconv.Itoa(week))
-		yearQ := c.DefaultQuery("year", strconv.Itoa(year))
+		dayQ, _ := string_to_int(c.DefaultQuery("day", "0"))
+		weekQ, _ := string_to_int(c.DefaultQuery("week", "0"))
+		yearQ, _ := string_to_int(c.DefaultQuery("year", "0"))
 		fmt.Printf("yeaer %+v", yearQ)
 		// c.JSON(http.StatusOK, gin.H{
 		// 	"message": "Error" + fmt.Sprintf("%+v", yearQ) + fmt.Sprintf("%+v", weekQ) + fmt.Sprintf("%+v", dayQ) + idParam,
@@ -64,13 +61,12 @@ func SetupRoutes(r *gin.Engine) {
 			return
 		}
 
-		// 	user, _ := structs.GetEmployee(idUint)
+		user, _ := structs.GetEmployee(idUint)
 
-		// 	u_sch := user.GetSchedule(day, week, year)
+		// u_sch := user.Schedule(dayQ, weekQ, yearQ)
+		u_sch := user.Schedule(dayQ, weekQ, yearQ)
 
-		// 	c.JSON(http.StatusOK, gin.H{
-		// 		"message": "Data received for " + fmt.Sprintf("%+v", u_sch),
-		// 	})
+		c.JSON(http.StatusOK, u_sch)
 	})
 
 	r.POST("/employee/:e_id/schedule", func(c *gin.Context) {
