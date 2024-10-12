@@ -3,10 +3,10 @@ package routes
 import (
 	"fmt"
 
+	"managee/structs"
 	"net/http"
 	"strconv"
-
-	"managee/structs"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,11 +44,15 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/employee/:e_id/schedule", func(c *gin.Context) {
 		idParam := c.Param("e_id")
-		// dayQ := c.Query("day")
-		// weekQ := c.Query("week")
-		// yearQ := c.Query("year")
+		currentTime := time.Now()
+		year, week := currentTime.ISOWeek()
+
+		dayQ := c.DefaultQuery("day", strconv.Itoa(int(currentTime.Day())))
+		weekQ := c.DefaultQuery("week", strconv.Itoa(week))
+		yearQ := c.DefaultQuery("year", strconv.Itoa(year))
+		fmt.Printf("yeaer %+v", yearQ)
 		// c.JSON(http.StatusOK, gin.H{
-		// 	"message": "Error" + fmt.Sprintf("%+v", yearQ) + fmt.Sprintf("%+v", weekQ) + fmt.Sprintf("%+v", dayQ),
+		// 	"message": "Error" + fmt.Sprintf("%+v", yearQ) + fmt.Sprintf("%+v", weekQ) + fmt.Sprintf("%+v", dayQ) + idParam,
 		// })
 		// return
 
@@ -60,31 +64,31 @@ func SetupRoutes(r *gin.Engine) {
 			return
 		}
 
-		user, _ := structs.GetEmployee(idUint)
+		// 	user, _ := structs.GetEmployee(idUint)
 
-		u_sch := user.GetSchedule()
+		// 	u_sch := user.GetSchedule(day, week, year)
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Data received for " + fmt.Sprintf("%+v", u_sch),
-		})
+		// 	c.JSON(http.StatusOK, gin.H{
+		// 		"message": "Data received for " + fmt.Sprintf("%+v", u_sch),
+		// 	})
 	})
 
 	r.POST("/employee/:e_id/schedule", func(c *gin.Context) {
-		idParam := c.Param("e_id")
-		idUint, err := string_to_int(idParam)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Error" + fmt.Sprintf("%+v", err),
-			})
-			return
-		}
+		// idParam := c.Param("e_id")
+		// idUint, err := string_to_int(idParam)
+		// if err != nil {
+		// 	c.JSON(http.StatusOK, gin.H{
+		// 		"message": "Error" + fmt.Sprintf("%+v", err),
+		// 	})
+		// 	return
+		// }
 
-		user, _ := structs.GetEmployee(idUint)
-		u_sch := user.GetSchedule()
+		// user, _ := structs.GetEmployee(idUint)
+		// u_sch := user.GetSchedule()
 
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Data received for " + fmt.Sprintf("%+v", u_sch),
-		})
+		// c.JSON(http.StatusOK, gin.H{
+		// 	"message": "Data received for " + fmt.Sprintf("%+v", u_sch),
+		// })
 	})
 
 }

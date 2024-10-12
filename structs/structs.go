@@ -12,7 +12,7 @@ var db *gorm.DB
 func init() {
 
 	// User represents a user in the application
-	var connectionString = "host=localhost user=postgres password=postgrespw dbname=your_db port=32769 sslmode=disable"
+	var connectionString = "host=localhost user=postgres password=postgrespw dbname=your_db port=32770 sslmode=disable"
 
 	// Connect to the database
 	var err error
@@ -46,11 +46,11 @@ func GetEmployee(userId int) (*Employee, string) {
 	return &employee, ""
 }
 
-func (employee Employee) GetSchedule() EmployeeSchedule {
-	storeId := employee.StoreID
-	eId := employee.ID
-	return EmployeeSchedule{StoreID: storeId, EmployeeID: eId, Day: Sunday, Week: 3, Year: 2024, StartTime: 1243, EndTime: 2345}
-}
+// func (employee Employee) GetSchedule() EmployeeSchedule {
+// 	storeId := employee.StoreID
+// 	eId := employee.ID
+// 	return EmployeeSchedule{StoreID: storeId, EmployeeID: eId, Day: Sunday, Week: 3, Year: 2024, StartTime: 1243, EndTime: 2345}
+// }
 
 type DayOfWeek int
 type WeekOfYear int
@@ -66,17 +66,21 @@ const (
 	Friday
 )
 
+type DaySchedule struct {
+	Day       DayOfWeek
+	Week      WeekOfYear
+	Year      Year
+	StartTime int
+	EndTime   int
+}
+
 type EmployeeSchedule struct {
 	StoreID    int
 	EmployeeID int `gorm:"primaryKey"`
-	Day        DayOfWeek
-	Week       WeekOfYear
-	Year       Year
-	StartTime  int
-	EndTime    int
+	Schedule   []DaySchedule
 }
 
 type StoreSchedule struct {
-	StoreId  int
-	Schedule []EmployeeSchedule
+	StoreId          int
+	EmployeSchedules []EmployeeSchedule
 }
