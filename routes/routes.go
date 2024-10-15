@@ -47,12 +47,6 @@ func SetupRoutes(r *gin.Engine) {
 		dayQ, _ := string_to_int(c.DefaultQuery("day", "0"))
 		weekQ, _ := string_to_int(c.DefaultQuery("week", "0"))
 		yearQ, _ := string_to_int(c.DefaultQuery("year", "0"))
-		fmt.Printf("yeaer %+v", yearQ)
-		// c.JSON(http.StatusOK, gin.H{
-		// 	"message": "Error" + fmt.Sprintf("%+v", yearQ) + fmt.Sprintf("%+v", weekQ) + fmt.Sprintf("%+v", dayQ) + idParam,
-		// })
-		// return
-
 		idUint, err := string_to_int(idParam)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
@@ -62,25 +56,31 @@ func SetupRoutes(r *gin.Engine) {
 		}
 
 		user, _ := structs.GetEmployee(idUint)
-
-		// u_sch := user.Schedule(dayQ, weekQ, yearQ)
 		u_sch := user.Schedule(dayQ, weekQ, yearQ)
 
 		c.JSON(http.StatusOK, u_sch)
 	})
 
 	r.POST("/employee/:e_id/schedule", func(c *gin.Context) {
-		// idParam := c.Param("e_id")
-		// idUint, err := string_to_int(idParam)
-		// if err != nil {
-		// 	c.JSON(http.StatusOK, gin.H{
-		// 		"message": "Error" + fmt.Sprintf("%+v", err),
-		// 	})
-		// 	return
-		// }
+		var schs []structs.EmployeeSchedule
+		if err := c.ShouldBindJSON(&schs); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
-		// user, _ := structs.GetEmployee(idUint)
-		// u_sch := user.GetSchedule()
+		idParam := c.Param("e_id")
+		idUint, _ := string_to_int(idParam)
+		user, _ := structs.GetEmployee(idUint)
+		if user != nil {
+			storeId := user.StoreID
+			eId := user.ID
+			for i := range schs {
+				schs[i].StoreID = storeId
+				schs[i].EmployeeID = eId
+			}
+		}
+
+		user.SetSchedule(schs)
 
 		// c.JSON(http.StatusOK, gin.H{
 		// 	"message": "Data received for " + fmt.Sprintf("%+v", u_sch),

@@ -34,10 +34,6 @@ type Employee struct {
 	StoreID int    `json:"storeid" binding:"required,min=0"`
 }
 
-func (user Employee) CreateEmployee() {
-	db.Create(&user)
-}
-
 func GetEmployee(userId int) (*Employee, string) {
 	var employee Employee
 	if err := db.First(&employee, userId).Error; err != nil {
@@ -45,6 +41,10 @@ func GetEmployee(userId int) (*Employee, string) {
 
 	}
 	return &employee, ""
+}
+
+func (user Employee) CreateEmployee() {
+	db.Create(&user)
 }
 
 func (employee Employee) Schedule(day int, week int, year int) []EmployeeSchedule {
@@ -74,6 +74,12 @@ func (employee Employee) Schedule(day int, week int, year int) []EmployeeSchedul
 	return sch
 }
 
+func (employee Employee) SetSchedule(schs []EmployeeSchedule) {
+	for _, sch := range schs {
+		db.Create(&sch)
+	}
+}
+
 type DayOfWeek int
 type WeekOfYear int
 type Year int
@@ -89,13 +95,13 @@ const (
 )
 
 type EmployeeSchedule struct {
-	StoreID    int
-	EmployeeID int
-	Day        DayOfWeek
-	Week       WeekOfYear
-	Year       Year
-	StartTime  int
-	EndTime    int
+	StoreID    int        `json:"sid" `
+	EmployeeID int        `json:"eid" `
+	Day        DayOfWeek  `json:"day"`
+	Week       WeekOfYear `json:"week"`
+	Year       Year       `json:"year"`
+	StartTime  int        `json:"starttime"`
+	EndTime    int        `json:"endtime"`
 }
 
 type StoreSchedule struct {

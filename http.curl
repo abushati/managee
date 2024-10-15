@@ -1,5 +1,16 @@
 curl http://0.0.0.0:8080/employee/1
 
-curl -X POST http://0.0.0.0:8080/employee/1/schedule
-
+curl -X POST http://0.0.0.0:8080/employee/1/schedule -d '[{
+      "day" : 12,
+      "week" : 42,
+      "year" : 2024,
+      "endtime" : 993,
+      "starttime" : 21
+   },{
+      "day" : 12,
+      "week" : 42,
+      "year" : 2024,
+      "endtime" : 1000000,
+      "starttime" : 21
+   }]'
 curl -X GET http://0.0.0.0:8080/employee/1/schedule
