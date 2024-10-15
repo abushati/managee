@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var db *gorm.DB
@@ -46,10 +47,10 @@ func GetEmployee(userId int) (*Employee, string) {
 	return &employee, ""
 }
 
-func (employee Employee) Schedule(day int, week int, year int) EmployeeSchedule {
+func (employee Employee) Schedule(day int, week int, year int) []EmployeeSchedule {
 	storeId := employee.StoreID
 	eId := employee.ID
-	var sch EmployeeSchedule
+	var sch []EmployeeSchedule
 
 	base := db.Where(&EmployeeSchedule{StoreID: storeId, EmployeeID: eId})
 	if day != 0 {
@@ -61,6 +62,13 @@ func (employee Employee) Schedule(day int, week int, year int) EmployeeSchedule 
 	if year != 0 {
 		base = base.Where("year = ?", year)
 	}
+
+	base.Order(clause.OrderBy{Columns: []clause.OrderByColumn{
+		{Column: clause.Column{Name: "year"}, Desc: true},
+		{Column: clause.Column{Name: "week"}, Desc: true},
+		{Column: clause.Column{Name: "day"}, Desc: true},
+	}})
+
 	base.Find(&sch)
 
 	return sch
