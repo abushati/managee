@@ -21,8 +21,14 @@ func string_to_int(stringInt string) (int, error) {
 
 // SetupRoutes sets up the routes for the application
 func SetupRoutes(r *gin.Engine) {
+	r.GET("/store/:s_id", func(c *gin.Context) {
+		idParam := c.Param("e_id")
+		sidParam, _ := string_to_int(idParam)
+		store, _ := structs.GetStore(sidParam)
+		c.JSON(http.StatusOK, store)
+	})
+
 	r.POST("/employee", func(c *gin.Context) {
-		//curl -X POST http://localhost:8080/employee -H "Content-Type: application/json" -d '{"name": "John Doe", "email": "john@example.com", "age": 24, "storeid": 4}'
 		var user structs.Employee // Use the User struct
 		if err := c.ShouldBindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -32,10 +38,11 @@ func SetupRoutes(r *gin.Engine) {
 		user.CreateEmployee()
 		// c.JSON(http.StatusOK, gin.H{
 	})
+
 	r.GET("/employee/:e_id", func(c *gin.Context) {
 		idParam := c.Param("e_id")
 		sidParam, _ := string_to_int(idParam)
-		// employee, _ := structs.GetEmployee(sidParam)
+
 		employee, _ := structs.GetEmployee(sidParam)
 		fmt.Printf("%+v", employee)
 		c.JSON(http.StatusOK, employee)
@@ -79,12 +86,29 @@ func SetupRoutes(r *gin.Engine) {
 				schs[i].EmployeeID = eId
 			}
 		}
+		user.SetSchedule(schs)
+	})
+
+	r.PUT("/employee/:e_id/schedule", func(c *gin.Context) {
+		var schs []structs.EmployeeSchedule
+		if err := c.ShouldBindJSON(&schs); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		idParam := c.Param("e_id")
+		idUint, _ := string_to_int(idParam)
+		user, _ := structs.GetEmployee(idUint)
+		if user != nil {
+			storeId := user.StoreID
+			eId := user.ID
+			for i := range schs {
+				schs[i].StoreID = storeId
+				schs[i].EmployeeID = eId
+			}
+		}
 
 		user.SetSchedule(schs)
 
-		// c.JSON(http.StatusOK, gin.H{
-		// 	"message": "Data received for " + fmt.Sprintf("%+v", u_sch),
-		// })
 	})
-
 }

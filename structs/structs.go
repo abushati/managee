@@ -24,6 +24,28 @@ func init() {
 	}
 	db.AutoMigrate(&Employee{})
 	db.AutoMigrate(&EmployeeSchedule{})
+	db.AutoMigrate(&Store{})
+}
+
+type Store struct {
+	ID       int    `json:"id" gorm:"primaryKey"`              // Unique identifier
+	Name     string `json:"name" binding:"required"`           // User's name
+	Location string `json:"location" binding:"required,email"` // User's email
+}
+
+func (store Store) GetEmployee() []Employee {
+	var employee []Employee
+	db.Where(&Employee{StoreID: store.ID}).Find(&employee)
+	return employee
+}
+
+func GetStore(storeId int) (*Store, string) {
+	var store Store
+	if err := db.First(&store, storeId).Error; err != nil {
+		return nil, "User not found"
+
+	}
+	return &store, ""
 }
 
 type Employee struct {
