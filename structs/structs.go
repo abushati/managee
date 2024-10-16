@@ -28,15 +28,19 @@ func init() {
 }
 
 type Store struct {
-	ID       int    `json:"id" gorm:"primaryKey"`              // Unique identifier
-	Name     string `json:"name" binding:"required"`           // User's name
-	Location string `json:"location" binding:"required,email"` // User's email
+	ID       int    `json:"id" gorm:"primaryKey"`        // Unique identifier
+	Name     string `json:"name" binding:"required"`     // User's name
+	Location string `json:"location" binding:"required"` // User's email
 }
 
-func (store Store) GetEmployee() []Employee {
+func (store Store) GetEmployees() []Employee {
 	var employee []Employee
 	db.Where(&Employee{StoreID: store.ID}).Find(&employee)
 	return employee
+}
+
+func (store Store) CreateStore() {
+	db.Create(&store)
 }
 
 func GetStore(storeId int) (*Store, string) {

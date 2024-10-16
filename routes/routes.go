@@ -22,9 +22,24 @@ func string_to_int(stringInt string) (int, error) {
 // SetupRoutes sets up the routes for the application
 func SetupRoutes(r *gin.Engine) {
 	r.GET("/store/:s_id", func(c *gin.Context) {
-		idParam := c.Param("e_id")
+		idParam := c.Param("s_id")
 		sidParam, _ := string_to_int(idParam)
 		store, _ := structs.GetStore(sidParam)
+		employees := store.GetEmployees()
+		dynamicMap := make(map[string]interface{})
+		dynamicMap["store"] = store
+		dynamicMap["employees"] = employees
+		c.JSON(http.StatusOK, dynamicMap)
+	})
+
+	r.POST("/store", func(c *gin.Context) {
+		var store structs.Store // Use the User struct
+		if err := c.ShouldBindJSON(&store); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		store.CreateStore()
 		c.JSON(http.StatusOK, store)
 	})
 
@@ -36,7 +51,6 @@ func SetupRoutes(r *gin.Engine) {
 		}
 
 		user.CreateEmployee()
-		// c.JSON(http.StatusOK, gin.H{
 	})
 
 	r.GET("/employee/:e_id", func(c *gin.Context) {

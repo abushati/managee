@@ -1,5 +1,10 @@
 curl http://0.0.0.0:8080/employee/1
+curl -X POST http://0.0.0.0:8080/employee -d '{"name": "testname", "email": "email@email.com", "age":2, "storeid": 1}'
 
+curl -X GET http://0.0.0.0:8080/store/1 
+curl -X POST http://0.0.0.0:8080/store -d '{"name": "store name", "location": "fake location"}'
+
+curl -X GET http://0.0.0.0:8080/employee/1/schedule
 curl -X POST http://0.0.0.0:8080/employee/1/schedule -d '[{
       "day" : 12,
       "week" : 42,
@@ -13,4 +18,3 @@ curl -X POST http://0.0.0.0:8080/employee/1/schedule -d '[{
       "endtime" : 1000000,
       "starttime" : 21
    }]'
-curl -X GET http://0.0.0.0:8080/employee/1/schedule
