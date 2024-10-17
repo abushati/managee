@@ -13,7 +13,7 @@
       </div>
       <div>
         <label for="age">Age:</label>
-        <input type="number" v-model="ages" id="age" required />
+        <input type="number" v-model="age" @input="updateAge" id="age" required />
       </div>
       <button type="submit">Submit</button>
     </form>
@@ -36,9 +36,13 @@ export default {
   setup() {
     const name = ref('');
     const email = ref('');
-    const ages = ref(null);
+    const age = ref(null);
     const submitted = ref(false);
     const error = ref(null);
+
+    const updateAge = (event) => {
+      age.value = Number(event.target.value); // Update age on input
+    };
 
     const handleSubmit = async () => {
       try {
@@ -46,7 +50,7 @@ export default {
         const response = await axios.post('http://localhost:8080/employee', {
           name: name.value,
           email: email.value,
-          age: ages.value,
+          age: age.value,
           storeid: 1,
         });
         
@@ -61,7 +65,7 @@ export default {
         submitted.value = false; // Reset submission status
       }
     };
-    return { name, email, ages, submitted, handleSubmit };
+    return { name, email, age, submitted, handleSubmit, updateAge };
   },
 };
 </script>
