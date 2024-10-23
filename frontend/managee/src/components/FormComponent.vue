@@ -15,6 +15,14 @@
         <label for="age">Age:</label>
         <input type="number" v-model="age" @input="updateAge" id="age" required />
       </div>
+      <div>
+        <label for="timeInput">Select Time: </label>
+        <input 
+          type="time" 
+          id="timeInput" 
+          v-model="selectedTime"
+        />
+      </div>
       <button type="submit">Submit</button>
     </form>
 
