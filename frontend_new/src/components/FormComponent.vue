@@ -13,15 +13,17 @@
       </div>
       <div>
         <label for="age">Age:</label>
-        <input type="number" v-model="age" @input="updateAge" id="age" required />
+        <input
+          type="number"
+          v-model="age"
+          @input="updateAge"
+          id="age"
+          required
+        />
       </div>
       <div>
         <label for="timeInput">Select Time: </label>
-        <input 
-          type="time" 
-          id="timeInput" 
-          v-model="selectedTime"
-        />
+        <input type="time" id="timeInput" v-model="selectedTime" />
       </div>
       <button type="submit">Submit</button>
     </form>
@@ -36,21 +38,21 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import axios from 'axios';
+import { ref } from 'vue'
+import axios from 'axios'
 
 export default {
   name: 'FormComponent',
   setup() {
-    const name = ref('');
-    const email = ref('');
-    const age = ref(null);
-    const submitted = ref(false);
-    const error = ref(null);
+    const name = ref('')
+    const email = ref('')
+    const age = ref(null)
+    const submitted = ref(false)
+    const error = ref(null)
 
-    const updateAge = (event) => {
-      age.value = Number(event.target.value); // Update age on input
-    };
+    const updateAge = event => {
+      age.value = Number(event.target.value) // Update age on input
+    }
 
     const handleSubmit = async () => {
       try {
@@ -60,22 +62,22 @@ export default {
           email: email.value,
           age: age.value,
           storeid: 1,
-        });
-        
+        })
+
         // Handle successful response
-        console.log('Response:', response.data);
-        submitted.value = true;
-        error.value = null; // Reset error
+        console.log('Response:', response.data)
+        submitted.value = true
+        error.value = null // Reset error
       } catch (err) {
         // Handle error
-        console.error('Error:', err);
-        error.value = 'Failed to submit data.';
-        submitted.value = false; // Reset submission status
+        console.error('Error:', err)
+        error.value = 'Failed to submit data.'
+        submitted.value = false // Reset submission status
       }
-    };
-    return { name, email, age, submitted, handleSubmit, updateAge };
+    }
+    return { name, email, age, submitted, handleSubmit, updateAge }
   },
-};
+}
 </script>
 
 <style scoped>
