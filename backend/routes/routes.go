@@ -21,6 +21,24 @@ func string_to_int(stringInt string) (int, error) {
 
 // SetupRoutes sets up the routes for the application
 func SetupRoutes(r *gin.Engine) {
+	r.POST("/store", func(c *gin.Context) {
+		var store structs.Store // Use the User struct
+		if err := c.ShouldBindJSON(&store); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		//Todo: need to get the user thats logged in to save portaluser id to store
+		store.CreateStore()
+		store.PortalUser = 1
+		c.JSON(http.StatusOK, store)
+	})
+	r.GET("/store", func(c *gin.Context) {
+		//Todo: need to get the user thats logged in to save portaluser id to store
+		PortalUser := 1
+		stores := structs.GetPortalUserStores(PortalUser)
+		c.JSON(http.StatusOK, stores)
+	})
+
 	r.GET("/store/:s_id", func(c *gin.Context) {
 		idParam := c.Param("s_id")
 		sidParam, _ := string_to_int(idParam)
@@ -30,17 +48,6 @@ func SetupRoutes(r *gin.Engine) {
 		dynamicMap["store"] = store
 		dynamicMap["employees"] = employees
 		c.JSON(http.StatusOK, dynamicMap)
-	})
-
-	r.POST("/store", func(c *gin.Context) {
-		var store structs.Store // Use the User struct
-		if err := c.ShouldBindJSON(&store); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		store.CreateStore()
-		c.JSON(http.StatusOK, store)
 	})
 
 	r.POST("/employee", func(c *gin.Context) {

@@ -28,9 +28,10 @@ func init() {
 }
 
 type Store struct {
-	ID       int    `json:"id" gorm:"primaryKey"`        // Unique identifier
-	Name     string `json:"name" binding:"required"`     // User's name
-	Location string `json:"location" binding:"required"` // User's email
+	ID         int    `json:"id" gorm:"primaryKey"`        // Unique identifier
+	Name       string `json:"name" binding:"required"`     // User's name
+	Location   string `json:"location" binding:"required"` // User's email
+	PortalUser int
 }
 
 func (store Store) GetEmployees() []Employee {
@@ -41,6 +42,13 @@ func (store Store) GetEmployees() []Employee {
 
 func (store Store) CreateStore() {
 	db.Create(&store)
+}
+
+func GetPortalUserStores(portalUser int) []Store {
+	var userStores []Store
+	db.Where(&Store{PortalUser: portalUser}).Find(&userStores)
+	return userStores
+
 }
 
 func GetStore(storeId int) (*Store, string) {

@@ -7,6 +7,8 @@ import FormComponent from '../components/FormComponent.vue'
     <main>
         <div>
             <EmployeeComponent />
+        </div>
+        <div>
             <FormComponent />      
         </div>
     </main>
