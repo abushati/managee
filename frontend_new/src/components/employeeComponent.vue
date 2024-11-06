@@ -32,7 +32,7 @@ export default {
     async fetchData() {
       this.loading = true
       try {
-        const response = await axios.get(`http://localhost:8080/store/${storeId}`) // Example API
+        const response = await axios.get(`http://localhost:8080/store/${this.storeId}`) // Example API
         this.data = response.data
         this.employees = this.data.employees
         //   this.employees = JSON.parse(this.data) // Populate Vue variable
