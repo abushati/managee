@@ -11,7 +11,9 @@ import StoreCard from '../components/StoreCard.vue'
           <StoreCard v-for="(item, index) in stores" 
           :key="index" 
           :storeName="item.name" 
-          :location="item.location"/>
+          :location="item.location"
+          :storeId="item.id"/>
+          
         </div>
         <div>
             <EmployeeComponent />
@@ -42,6 +44,7 @@ export default {
       try {
         const response = await axios.get('http://localhost:8080/store') // Example API
         this.stores = response.data
+        console.log(this.stores)
         //   this.employees = JSON.parse(this.data) // Populate Vue variable
       } catch (err) {
         this.error = 'Error fetching data' // Handle error

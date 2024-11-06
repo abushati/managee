@@ -12,7 +12,7 @@ const router = createRouter({
       component: EmployeeComponent,
     },
     {
-      path: '/store',
+      path: '/store/:id',
       name: 'StoreComponent',
       component: StoreView
     },

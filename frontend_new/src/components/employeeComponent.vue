@@ -14,6 +14,9 @@ import axios from 'axios'
 
 export default {
   name: 'EmployeeComponent',
+  props: {
+        storeId: String,
+    },
   data() {
     return {
       data: null,
@@ -29,7 +32,7 @@ export default {
     async fetchData() {
       this.loading = true
       try {
-        const response = await axios.get('http://localhost:8080/store/1') // Example API
+        const response = await axios.get(`http://localhost:8080/store/${storeId}`) // Example API
         this.data = response.data
         this.employees = this.data.employees
         //   this.employees = JSON.parse(this.data) // Populate Vue variable

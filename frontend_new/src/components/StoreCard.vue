@@ -1,8 +1,10 @@
 <template>
-    <div class="StoreCard">
-      <div>{{ storeName }}</div>
-      <div>{{ location }}</div>
-    </div>
+     <router-link :to="`/store/${storeId}`">
+        <div class="StoreCard">
+            <div>{{ storeName }}</div>
+            <div>{{ location }}</div>
+        </div>
+    </router-link>
   </template>
   
   <script>
@@ -10,6 +12,7 @@
   
   export default {
     props: {
+        storeId: String,
         storeName: String,
         location: String
     },
@@ -26,7 +29,7 @@
   </script>
 
 <style scoped>
-.card {
+.StoreCard {
     display: block;
     margin: 0 auto 2rem;
     background-color: gray;
