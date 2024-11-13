@@ -3,7 +3,7 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-  <!-- <header>
+  <header>
     <div class="wrapper">
 
       <nav>
@@ -13,7 +13,7 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/store">Store</RouterLink>
       </nav>
     </div>
-  </header> -->
+  </header>
 
   <RouterView />
 </template>
@@ -24,10 +24,6 @@ header {
   max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
 
 nav {
   width: 100%;
