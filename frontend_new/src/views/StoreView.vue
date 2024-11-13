@@ -10,7 +10,6 @@ import ScheduleFormComponent from '../components/ScheduleFormComponent.vue';
 
 const route = useRoute();
 const storeId = route.params.id;
-
 const storeDataStore = useStoreDataStore();
 
 onMounted(() => {

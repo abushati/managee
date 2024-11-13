@@ -12,11 +12,9 @@ export const useStoreDataStore = defineStore('Store', {
     async fetchStore(storeId) {
       this.loading = true;
       this.error = null;
-      console.log(storeId)
       try {
         const storeResponse = await axios.get(`http://localhost:8080/store/${storeId}`)
         this.storeData = storeResponse.data
-        console.error(this.storeData);
       } catch (error) {
         this.error = 'Failed to fetch employees';
         console.error(error);
