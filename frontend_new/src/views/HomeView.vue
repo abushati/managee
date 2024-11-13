@@ -35,24 +35,5 @@ export default {
       error: null,
     }
   },
-  mounted() {
-    this.fetchData() // Fetch data when component is mounted
-  },
-  methods: {
-    async fetchData() {
-      this.loading = true
-      try {
-        const response = await axios.get('http://localhost:8080/store') // Example API
-        this.stores = response.data
-        console.log(this.stores)
-        //   this.employees = JSON.parse(this.data) // Populate Vue variable
-      } catch (err) {
-        this.error = 'Error fetching data' // Handle error
-        console.log(err)
-      } finally {
-        this.loading = false
-      }
-    },
-  },
 }
 </script>

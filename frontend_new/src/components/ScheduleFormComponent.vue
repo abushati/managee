@@ -44,7 +44,7 @@
   <script>
 export default {
     props: {
-        storeEmployees: List
+        storeEmployees: String
     },
     data() {
         return {

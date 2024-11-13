@@ -57,6 +57,7 @@ export default {
           name: name.value,
           email: email.value,
           age: age.value,
+          //Todo: change this to use the store id from the store Pinia store
           storeid: 1,
         })
 

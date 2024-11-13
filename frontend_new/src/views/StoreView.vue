@@ -1,18 +1,27 @@
-<script setup lang="ts">
+<script setup>
+import axios from 'axios'
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { onMounted } from 'vue';
+import { useStoreDataStore } from '@/stores/Store';
 import EmployeeComponent from '../components/employeeComponent.vue';
 import FormComponent from '../components/FormComponent.vue';
 import ScheduleFormComponent from '../components/ScheduleFormComponent.vue';
 
 const route = useRoute();
-const storeId = ref(route.params.id);  // Capture the dynamic route param
+const storeId = route.params.id;
+
+const storeDataStore = useStoreDataStore();
+
+onMounted(() => {
+  storeDataStore.fetchStore(storeId);
+});
 </script>
 
 <template>
   <main>
     <div>
-      <EmployeeComponent :storeId="storeId" />
+      <EmployeeComponent/>
     </div>
     <div>
         <ScheduleFormComponent />
@@ -22,3 +31,5 @@ const storeId = ref(route.params.id);  // Capture the dynamic route param
     </div>
   </main>
 </template>
+
+
