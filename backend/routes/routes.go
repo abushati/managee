@@ -90,6 +90,14 @@ func SetupRoutes(r *gin.Engine) {
 	})
 
 	r.POST("/employee/:e_id/schedule", func(c *gin.Context) {
+		// body, err := ioutil.ReadAll(c.Request.Body)
+		// if err != nil {
+		// 	log.Println("Error reading body:", err)
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read request body"})
+		// 	return
+		// }
+		// fmt.Println("Request Body:", string(body))
+
 		var schs []structs.EmployeeSchedule
 		if err := c.ShouldBindJSON(&schs); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
