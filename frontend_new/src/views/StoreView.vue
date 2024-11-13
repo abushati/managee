@@ -18,7 +18,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main>
+  <main id="store">
     <div>
       <EmployeeComponent/>
     </div>
@@ -32,3 +32,9 @@ onMounted(() => {
 </template>
 
 
+<style>
+#store {
+    display: flex;
+    width: max-content;
+}
+</style>

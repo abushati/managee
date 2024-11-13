@@ -118,16 +118,6 @@ type DayOfWeek int
 type WeekOfYear int
 type Year int
 
-const (
-	Saturday DayOfWeek = iota
-	Sunday
-	Monday
-	Tuesday
-	Wednesday
-	Thrusday
-	Friday
-)
-
 type EmployeeSchedule struct {
 	StoreID    int        `json:"sid" `
 	EmployeeID int        `json:"eid" `
