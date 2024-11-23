@@ -140,4 +140,26 @@ func SetupRoutes(r *gin.Engine) {
 		user.SetSchedule(schs)
 
 	})
+
+	r.POST("store/:s_id/forcast", func(c *gin.Context) {
+		storeId := 1
+		go runForcast(storeId, 46, 2024)
+		c.JSON(http.StatusOK, "ok")
+	})
+
+}
+
+func runForcast(storeId int, week int, year int) {
+	schedules := structs.GetSchedules(storeId, 0, week, year)
+	perUserSchedules := make(map[int][]structs.EmployeeSchedule)
+	for _, schedule := range schedules {
+		scheduleEmployeeId := schedule.EmployeeID
+		perUserSchedules[scheduleEmployeeId] = append(perUserSchedules[scheduleEmployeeId], schedule)
+	}
+	fmt.Println(perUserSchedules)
+
+	for eId, s := range perUserSchedules {
+		structs.GenerateEmployeeForcast(eId, s)
+	}
+
 }

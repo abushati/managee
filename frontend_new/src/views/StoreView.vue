@@ -7,6 +7,8 @@ import { useStoreDataStore } from '@/stores/Store';
 import EmployeeComponent from '../components/employeeComponent.vue';
 import FormComponent from '../components/FormComponent.vue';
 import ScheduleFormComponent from '../components/ScheduleFormComponent.vue';
+import ForcastComponent from '../components/ForcastComponent.vue';
+
 
 const route = useRoute();
 const storeId = route.params.id;
@@ -18,15 +20,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <main id="store">
-    <div>
-      <EmployeeComponent/>
+  <main >
+    <div id="store">
+        <div>
+        <EmployeeComponent/>
+        </div>
+        <div>
+            <ScheduleFormComponent />
+        </div>
+        <div>
+        <FormComponent />      
+        </div>
     </div>
     <div>
-        <ScheduleFormComponent />
-    </div>
-    <div>
-      <FormComponent />      
+        <ForcastComponent />
     </div>
   </main>
 </template>

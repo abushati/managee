@@ -25,6 +25,7 @@ func init() {
 	db.AutoMigrate(&Employee{})
 	db.AutoMigrate(&EmployeeSchedule{})
 	db.AutoMigrate(&Store{})
+	db.AutoMigrate(&EmployeeForcast{})
 }
 
 type Store struct {
@@ -108,6 +109,31 @@ func (employee Employee) Schedule(day int, week int, year int) []EmployeeSchedul
 	return sch
 }
 
+func GetSchedules(storeId int, day int, week int, year int) []EmployeeSchedule {
+	var sch []EmployeeSchedule
+
+	base := db.Where(&EmployeeSchedule{StoreID: storeId})
+	if day != 0 {
+		base = base.Where("day = ?", day)
+	}
+	if week != 0 {
+		base = base.Where("week = ?", week)
+	}
+	if year != 0 {
+		base = base.Where("year = ?", year)
+	}
+
+	base.Order(clause.OrderBy{Columns: []clause.OrderByColumn{
+		{Column: clause.Column{Name: "year"}, Desc: true},
+		{Column: clause.Column{Name: "week"}, Desc: true},
+		{Column: clause.Column{Name: "day"}, Desc: true},
+	}})
+
+	base.Find(&sch)
+
+	return sch
+}
+
 func (employee Employee) SetSchedule(schs []EmployeeSchedule) {
 	for _, sch := range schs {
 		db.Create(&sch)
@@ -131,4 +157,58 @@ type EmployeeSchedule struct {
 type StoreSchedule struct {
 	StoreId           int
 	EmployeeSchedules []EmployeeSchedule
+}
+
+type EmployeeForcast struct {
+	StoreId               int
+	EmployeeId            int
+	ForcastId             int
+	TotalHours            int
+	TotalRegularHours     int
+	OverTimeHours         int
+	SpreadOfPay           int
+	TotalRegularWage      int
+	TotalBaseWage         int
+	PayrollTaxEstimated   int
+	TotalForcastHourlyPay int
+	Salaries              int
+}
+
+// Todo: get Forcast with a hash of storeid/week/year
+func GenerateEmployeeForcast(eId int, eschls []EmployeeSchedule) {
+	regularHoursinmins := 2400
+	weeklyTotalMins := 0
+	totalRegularMins := 0
+	overTimeMin := 0
+	for _, esch := range eschls {
+
+		if esch.EmployeeID != eId {
+			fmt.Printf("Employee IDs don't match: expected %d, got %+v\n", eId, esch)
+			continue
+		}
+		endTimeInMins := esch.EndTime
+		startTimeInMins := esch.StartTime
+		totalMins := endTimeInMins - startTimeInMins
+		weeklyTotalMins += totalMins
+
+	}
+	if weeklyTotalMins > totalRegularMins {
+		totalRegularMins = regularHoursinmins
+		overTimeMin = weeklyTotalMins - regularHoursinmins
+	} else {
+		totalRegularMins = weeklyTotalMins
+	}
+
+	employeeDetails, err := GetEmployee(eId)
+	if err == "" {
+		fmt.Print("here")
+	}
+
+	employeeForcast := EmployeeForcast{
+		StoreId: employeeDetails.StoreID,
+		EmployeeId: 
+	}
+
+	fmt.Printf("Employee IDs %d total mins %d", eId, weeklyTotalMins)
+	fmt.Printf("Employee %+v\n", employeeForcast)
 }
