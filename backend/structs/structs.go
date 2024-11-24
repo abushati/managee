@@ -62,11 +62,12 @@ func GetStore(storeId int) (*Store, string) {
 }
 
 type Employee struct {
-	ID      int    `json:"id" gorm:"primaryKey"`           // Unique identifier
-	Name    string `json:"name" binding:"required"`        // User's name
-	Email   string `json:"email" binding:"required,email"` // User's email
-	Age     int    `json:"age" binding:"required,min=0"`   // User's age
-	StoreID int    `json:"storeid" binding:"required,min=0"`
+	ID         int     `json:"id" gorm:"primaryKey"`           // Unique identifier
+	Name       string  `json:"name" binding:"required"`        // User's name
+	Email      string  `json:"email" binding:"required,email"` // User's email
+	Age        int     `json:"age" binding:"required,min=0"`   // User's age
+	StoreID    int     `json:"storeid" binding:"required,min=0"`
+	HourlyRate float32 `json:"hourly_rate" binding:"requried"`
 }
 
 func GetEmployee(userId int) (*Employee, string) {
@@ -166,12 +167,12 @@ type EmployeeForcast struct {
 	TotalHours            int
 	TotalRegularHours     int
 	OverTimeHours         int
-	SpreadOfPay           int
-	TotalRegularWage      int
-	TotalBaseWage         int
-	PayrollTaxEstimated   int
-	TotalForcastHourlyPay int
-	Salaries              int
+	SpreadOfPay           float32
+	TotalRegularWage      float32
+	TotalBaseWage         float32
+	PayrollTaxEstimated   float32
+	TotalForcastHourlyPay float32
+	Salaries              float32
 }
 
 // Todo: get Forcast with a hash of storeid/week/year
@@ -180,8 +181,8 @@ func GenerateEmployeeForcast(eId int, eschls []EmployeeSchedule) {
 	weeklyTotalMins := 0
 	totalRegularMins := 0
 	overTimeMin := 0
+	spreadOfPayBase := 15
 	for _, esch := range eschls {
-
 		if esch.EmployeeID != eId {
 			fmt.Printf("Employee IDs don't match: expected %d, got %+v\n", eId, esch)
 			continue
@@ -199,14 +200,21 @@ func GenerateEmployeeForcast(eId int, eschls []EmployeeSchedule) {
 		totalRegularMins = weeklyTotalMins
 	}
 
-	employeeDetails, err := GetEmployee(eId)
+	employee, err := GetEmployee(eId)
 	if err == "" {
 		fmt.Print("here")
 	}
 
+	spreadOfPay := employee.HourlyRate * float32(spreadOfPayBase)
+	toalRegularWage := employee.HourlyRate * float32(totalRegularMins)
 	employeeForcast := EmployeeForcast{
-		StoreId: employeeDetails.StoreID,
-		EmployeeId: 
+		StoreId:           employee.StoreID,
+		EmployeeId:        employee.ID,
+		TotalHours:        weeklyTotalMins,
+		TotalRegularHours: totalRegularMins,
+		OverTimeHours:     overTimeMin,
+		SpreadOfPay:       spreadOfPay,
+		TotalRegularWage:  toalRegularWage,
 	}
 
 	fmt.Printf("Employee IDs %d total mins %d", eId, weeklyTotalMins)
