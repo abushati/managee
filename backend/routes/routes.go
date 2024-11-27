@@ -141,9 +141,11 @@ func SetupRoutes(r *gin.Engine) {
 
 	})
 
-	r.POST("store/:s_id/forcast", func(c *gin.Context) {
-		storeId := 1
-		go runForcast(storeId, 46, 2024)
+	r.POST("store/:s_id/forcast/:year/:week", func(c *gin.Context) {
+		storeId, _ := string_to_int(c.Param("s_id"))
+		year, _ := string_to_int(c.Param("year"))
+		week, _ := string_to_int(c.Param("week"))
+		go runForcast(storeId, week, year)
 		c.JSON(http.StatusOK, "ok")
 	})
 
@@ -159,7 +161,7 @@ func runForcast(storeId int, week int, year int) {
 	fmt.Println(perUserSchedules)
 
 	for eId, s := range perUserSchedules {
-		structs.GenerateEmployeeForcast(eId, s)
+		structs.GenerateEmployeeForcast(eId, s, year, week)
 	}
 
 }

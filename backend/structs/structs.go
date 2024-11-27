@@ -62,12 +62,15 @@ func GetStore(storeId int) (*Store, string) {
 }
 
 type Employee struct {
-	ID         int     `json:"id" gorm:"primaryKey"`           // Unique identifier
-	Name       string  `json:"name" binding:"required"`        // User's name
-	Email      string  `json:"email" binding:"required,email"` // User's email
-	Age        int     `json:"age" binding:"required,min=0"`   // User's age
-	StoreID    int     `json:"storeid" binding:"required,min=0"`
-	HourlyRate float32 `json:"hourly_rate" binding:"requried"`
+	ID      int    `json:"id" gorm:"primaryKey"`           // Unique identifier
+	Name    string `json:"name" binding:"required"`        // User's name
+	Email   string `json:"email" binding:"required,email"` // User's email
+	Age     int    `json:"age" binding:"required,min=0"`   // User's age
+	StoreID int    `json:"storeid" binding:"required,min=0"`
+	//Todo: validated that its hourly or salary
+	CompensationType string  `json:"compensation_type" binding:"required,min=0"`
+	HourlyRate       float64 `json:"hourly_rate" default:"0"`
+	Salary           float64 `json:"salary" default:"0"`
 }
 
 func GetEmployee(userId int) (*Employee, string) {
@@ -141,18 +144,14 @@ func (employee Employee) SetSchedule(schs []EmployeeSchedule) {
 	}
 }
 
-type DayOfWeek int
-type WeekOfYear int
-type Year int
-
 type EmployeeSchedule struct {
-	StoreID    int        `json:"sid" `
-	EmployeeID int        `json:"eid" `
-	Day        DayOfWeek  `json:"day"`
-	Week       WeekOfYear `json:"week"`
-	Year       Year       `json:"year"`
-	StartTime  int        `json:"starttime"`
-	EndTime    int        `json:"endtime"`
+	StoreID    int `json:"sid" `
+	EmployeeID int `json:"eid" `
+	Day        int `json:"day"`
+	Week       int `json:"week"`
+	Year       int `json:"year"`
+	StartTime  int `json:"starttime"`
+	EndTime    int `json:"endtime"`
 }
 
 type StoreSchedule struct {
@@ -161,62 +160,93 @@ type StoreSchedule struct {
 }
 
 type EmployeeForcast struct {
-	StoreId               int
-	EmployeeId            int
-	ForcastId             int
-	TotalHours            int
-	TotalRegularHours     int
-	OverTimeHours         int
-	SpreadOfPay           float32
-	TotalRegularWage      float32
-	TotalBaseWage         float32
-	PayrollTaxEstimated   float32
-	TotalForcastHourlyPay float32
-	Salaries              float32
+	YearWeek                  string
+	StoreId                   int
+	EmployeeId                int
+	ForcastId                 int `gorm:"primaryKey;autoIncrement"`
+	TotalHours                float64
+	TotalRegularHours         float64
+	OverTimeHours             float64
+	SpreadOfPay               float64
+	TotalRegularWage          float64
+	OvertimeWage              float64
+	TotalBaseWage             float64
+	PayrollTaxEstimated       float64
+	GrandTotalPayrollForecast float64
+	Salary                    float64
+}
+
+func (ef EmployeeForcast) save() {
+	db.Create(&ef)
+}
+
+func minsToHoursConverter(mins int) float64 {
+	return float64(mins) / 60
 }
 
 // Todo: get Forcast with a hash of storeid/week/year
-func GenerateEmployeeForcast(eId int, eschls []EmployeeSchedule) {
+func GenerateEmployeeForcast(employeeId int, employeeSchedules []EmployeeSchedule, year int, week int) {
 	regularHoursinmins := 2400
 	weeklyTotalMins := 0
 	totalRegularMins := 0
 	overTimeMin := 0
-	spreadOfPayBase := 15
-	for _, esch := range eschls {
-		if esch.EmployeeID != eId {
-			fmt.Printf("Employee IDs don't match: expected %d, got %+v\n", eId, esch)
+	spreadOfPayBase := 15.0
+
+	employee, err := GetEmployee(employeeId)
+	if err != "" {
+		fmt.Printf("Employee IDs %d don't exist\n", employeeId)
+		return
+	}
+
+	for _, dailySchedule := range employeeSchedules {
+		if dailySchedule.EmployeeID != employeeId {
+			fmt.Printf("Employee IDs don't match: expected %d, got %+v\n", employeeId, dailySchedule)
+			continue
+		} else if dailySchedule.Week != week || dailySchedule.Year != year {
+			fmt.Printf("Schedule week/year doesn't match expected week %d, year %d got schedule with week %d year %d \n", week, year, dailySchedule.Week, dailySchedule.Year)
 			continue
 		}
-		endTimeInMins := esch.EndTime
-		startTimeInMins := esch.StartTime
+
+		endTimeInMins := dailySchedule.EndTime
+		startTimeInMins := dailySchedule.StartTime
 		totalMins := endTimeInMins - startTimeInMins
 		weeklyTotalMins += totalMins
-
 	}
-	if weeklyTotalMins > totalRegularMins {
+
+	if weeklyTotalMins > regularHoursinmins {
 		totalRegularMins = regularHoursinmins
 		overTimeMin = weeklyTotalMins - regularHoursinmins
 	} else {
 		totalRegularMins = weeklyTotalMins
 	}
+	totalHours := minsToHoursConverter(weeklyTotalMins)
+	totalRegularHours := minsToHoursConverter(totalRegularMins)
+	overTimeHours := minsToHoursConverter(overTimeMin)
 
-	employee, err := GetEmployee(eId)
-	if err == "" {
-		fmt.Print("here")
-	}
+	spreadOfPay := employee.HourlyRate * spreadOfPayBase
+	toalRegularWage := employee.HourlyRate * totalRegularHours
+	overtimeWage := employee.HourlyRate * 1.5 * overTimeHours
+	totalBaseWage := spreadOfPay + toalRegularWage + overtimeWage
 
-	spreadOfPay := employee.HourlyRate * float32(spreadOfPayBase)
-	toalRegularWage := employee.HourlyRate * float32(totalRegularMins)
+	payrollTaxEstimated := totalBaseWage * .1
+	grandTotalPayrollForecast := totalBaseWage + payrollTaxEstimated
+
 	employeeForcast := EmployeeForcast{
-		StoreId:           employee.StoreID,
-		EmployeeId:        employee.ID,
-		TotalHours:        weeklyTotalMins,
-		TotalRegularHours: totalRegularMins,
-		OverTimeHours:     overTimeMin,
-		SpreadOfPay:       spreadOfPay,
-		TotalRegularWage:  toalRegularWage,
+		YearWeek:                  fmt.Sprintf("%d/%d", year, week),
+		StoreId:                   employee.StoreID,
+		EmployeeId:                employee.ID,
+		TotalHours:                totalHours,
+		TotalRegularHours:         totalRegularHours,
+		OverTimeHours:             overTimeHours,
+		SpreadOfPay:               spreadOfPay,
+		TotalRegularWage:          toalRegularWage,
+		OvertimeWage:              overtimeWage,
+		TotalBaseWage:             totalBaseWage,
+		PayrollTaxEstimated:       payrollTaxEstimated,
+		GrandTotalPayrollForecast: grandTotalPayrollForecast,
+		Salary:                    employee.Salary,
 	}
-
-	fmt.Printf("Employee IDs %d total mins %d", eId, weeklyTotalMins)
-	fmt.Printf("Employee %+v\n", employeeForcast)
+	employeeForcast.save()
+	fmt.Printf("Employee IDs %d total mins %d", employeeId, weeklyTotalMins)
+	fmt.Printf("EmployeeForcast %+v\n", employeeForcast)
 }
