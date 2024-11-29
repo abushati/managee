@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"sync"
 
 	"managee/structs"
 	"net/http"
@@ -160,15 +161,24 @@ func runForcast(storeId int, week int, year int) {
 		perUserSchedules[scheduleEmployeeId] = append(perUserSchedules[scheduleEmployeeId], schedule)
 	}
 	fmt.Println(perUserSchedules)
-	done := make(chan bool, len(perUserSchedules))
+	done := make(chan structs.EmployeeForcast, len(perUserSchedules))
+	var wg sync.WaitGroup
 	start := time.Now()
+
 	for eId, s := range perUserSchedules {
+		wg.Add(1)
 		go structs.GenerateEmployeeForcast(done, eId, s, year, week)
 	}
-	for range len(perUserSchedules) {
-		<-done
-	}
+
+	go func() {
+		wg.Wait()
+		close(done) // Close the channel when all work is done
+	}()
 	elapsed := time.Since(start)
+
+	for result := range done {
+		fmt.Println("Received result:", result)
+	}
 	fmt.Printf("someFunction execution time: %s\n", elapsed)
 
 }

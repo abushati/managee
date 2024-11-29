@@ -26,6 +26,7 @@ func init() {
 	db.AutoMigrate(&EmployeeSchedule{})
 	db.AutoMigrate(&Store{})
 	db.AutoMigrate(&EmployeeForcast{})
+	db.AutoMigrate(&StoreForcast{})
 }
 
 type Store struct {
@@ -79,6 +80,8 @@ const (
 	Bastender
 	Barback
 )
+
+var BackOfHousePositions = []Position{HeadChef, SousChef, LineCook, PrepCook, PastryChef, Dishwasher, Expediter}
 
 type Employee struct {
 	ID      int    `json:"id" gorm:"primaryKey"`           // Unique identifier
@@ -200,12 +203,38 @@ func (ef EmployeeForcast) save() {
 	db.Create(&ef)
 }
 
+type StoreForcast struct {
+	StoreId                              int
+	ForcastId                            int `gorm:"primaryKey;autoIncrement"`
+	YearWeek                             string
+	FrontHouseTotalHours                 float64
+	FrontHouseTotalRegHours              float64
+	FrontHouseOverTimeHours              float64
+	FrontHouseSpreadofPay                float64
+	FrontHouseTotalRegWage               float64
+	FrontHouseOvertimeWage               float64
+	FrontHouseTotalBaseWage              float64
+	FrontHousePayrollTaxEstimate         float64
+	FrontHouseTotalForecastHourlyPayRate float64
+	FrontHouseSalary                     float64
+	BackHouseTotalHours                  float64
+	BackHouseTotalRegHours               float64
+	BackHouseOverTimeHours               float64
+	BackHouseSpreadofPay                 float64
+	BackHouseTotalRegWage                float64
+	BackHouseOvertimeWage                float64
+	BackHouseTotalBaseWage               float64
+	BackHousePayrollTaxEstimate          float64
+	BackHouseTotalForecastHourlyPayRate  float64
+	BackHouseSalary                      float64
+}
+
 func minsToHoursConverter(mins int) float64 {
 	return float64(mins) / 60
 }
 
 // Todo: get Forcast with a hash of storeid/week/year
-func GenerateEmployeeForcast(done chan bool, employeeId int, employeeSchedules []EmployeeSchedule, year int, week int) {
+func GenerateEmployeeForcast(done chan EmployeeForcast, employeeId int, employeeSchedules []EmployeeSchedule, year int, week int) (*EmployeeForcast, string) {
 	regularHoursinmins := 2400
 	weeklyTotalMins := 0
 	totalRegularMins := 0
@@ -215,7 +244,7 @@ func GenerateEmployeeForcast(done chan bool, employeeId int, employeeSchedules [
 	employee, err := GetEmployee(employeeId)
 	if err != "" {
 		fmt.Printf("Employee IDs %d don't exist\n", employeeId)
-		return
+		return nil, "employee nonexist"
 	}
 
 	for _, dailySchedule := range employeeSchedules {
@@ -267,7 +296,22 @@ func GenerateEmployeeForcast(done chan bool, employeeId int, employeeSchedules [
 		Salary:                    employee.Salary,
 	}
 	employeeForcast.save()
-	done <- true
+	done <- employeeForcast
 	fmt.Printf("Employee IDs %d total mins %d", employeeId, weeklyTotalMins)
 	fmt.Printf("EmployeeForcast %+v\n", employeeForcast)
+	return &employeeForcast, ""
+}
+
+func GenerateStoreForcast(employeeForcasts []EmployeeForcast) {
+
+	for forcast := range employeeForcasts {
+		employee, err := GetEmployee(forcast)
+		if err != "" {
+			fmt.Print("bad)")
+		}
+		if contains(BackOfHousePositions, employee.Position) {
+
+		}
+	}
+
 }
