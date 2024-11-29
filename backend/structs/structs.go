@@ -61,6 +61,25 @@ func GetStore(storeId int) (*Store, string) {
 	return &store, ""
 }
 
+type Position int
+
+const (
+	HeadChef Position = iota //BOH
+	SousChef
+	LineCook
+	PrepCook
+	PastryChef
+	Dishwasher
+	Expediter
+	GeneralManager //FOH
+	AssistantManager
+	Host
+	Server
+	Busser
+	Bastender
+	Barback
+)
+
 type Employee struct {
 	ID      int    `json:"id" gorm:"primaryKey"`           // Unique identifier
 	Name    string `json:"name" binding:"required"`        // User's name
@@ -68,9 +87,10 @@ type Employee struct {
 	Age     int    `json:"age" binding:"required,min=0"`   // User's age
 	StoreID int    `json:"storeid" binding:"required,min=0"`
 	//Todo: validated that its hourly or salary
-	CompensationType string  `json:"compensation_type" binding:"required,min=0"`
-	HourlyRate       float64 `json:"hourly_rate" default:"0"`
-	Salary           float64 `json:"salary" default:"0"`
+	CompensationType string   `json:"compensation_type" binding:"required,min=0"`
+	HourlyRate       float64  `json:"hourly_rate" default:"0"`
+	Salary           float64  `json:"salary" default:"0"`
+	Position         Position `json:"position"`
 }
 
 func GetEmployee(userId int) (*Employee, string) {
@@ -185,7 +205,7 @@ func minsToHoursConverter(mins int) float64 {
 }
 
 // Todo: get Forcast with a hash of storeid/week/year
-func GenerateEmployeeForcast(employeeId int, employeeSchedules []EmployeeSchedule, year int, week int) {
+func GenerateEmployeeForcast(done chan bool, employeeId int, employeeSchedules []EmployeeSchedule, year int, week int) {
 	regularHoursinmins := 2400
 	weeklyTotalMins := 0
 	totalRegularMins := 0
@@ -247,6 +267,7 @@ func GenerateEmployeeForcast(employeeId int, employeeSchedules []EmployeeSchedul
 		Salary:                    employee.Salary,
 	}
 	employeeForcast.save()
+	done <- true
 	fmt.Printf("Employee IDs %d total mins %d", employeeId, weeklyTotalMins)
 	fmt.Printf("EmployeeForcast %+v\n", employeeForcast)
 }

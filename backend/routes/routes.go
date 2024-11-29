@@ -6,6 +6,7 @@ import (
 	"managee/structs"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -159,9 +160,15 @@ func runForcast(storeId int, week int, year int) {
 		perUserSchedules[scheduleEmployeeId] = append(perUserSchedules[scheduleEmployeeId], schedule)
 	}
 	fmt.Println(perUserSchedules)
-
+	done := make(chan bool, len(perUserSchedules))
+	start := time.Now()
 	for eId, s := range perUserSchedules {
-		structs.GenerateEmployeeForcast(eId, s, year, week)
+		go structs.GenerateEmployeeForcast(done, eId, s, year, week)
 	}
+	for range len(perUserSchedules) {
+		<-done
+	}
+	elapsed := time.Since(start)
+	fmt.Printf("someFunction execution time: %s\n", elapsed)
 
 }
