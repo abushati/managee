@@ -83,6 +83,17 @@ const (
 
 var BackOfHousePositions = []Position{HeadChef, SousChef, LineCook, PrepCook, PastryChef, Dishwasher, Expediter}
 
+func positionType(p Position) string {
+	for _, pos := range BackOfHousePositions {
+		if pos == p {
+			return "boh"
+		}
+	}
+	//Todo: need to check here as well
+	return "foh"
+
+}
+
 type Employee struct {
 	ID      int    `json:"id" gorm:"primaryKey"`           // Unique identifier
 	Name    string `json:"name" binding:"required"`        // User's name
@@ -203,30 +214,40 @@ func (ef EmployeeForcast) save() {
 	db.Create(&ef)
 }
 
+type Forcast struct {
+	TotalHours                 float64
+	TotalRegHours              float64
+	OverTimeHours              float64
+	SpreadofPay                float64
+	TotalRegWage               float64
+	OvertimeWage               float64
+	TotalBaseWage              float64
+	PayrollTaxEstimate         float64
+	TotalForecastHourlyPayRate float64
+	Salary                     float64
+}
+
+func (f Forcast) combine(of Forcast) Forcast {
+	returnForcast := Forcast{}
+	returnForcast.TotalHours = f.TotalHours + of.TotalHours
+	returnForcast.TotalRegHours = f.TotalRegHours + of.TotalRegHours
+	returnForcast.OverTimeHours = f.OverTimeHours + of.OverTimeHours
+	returnForcast.SpreadofPay = f.SpreadofPay + of.SpreadofPay
+	returnForcast.TotalRegWage = f.TotalRegWage + of.TotalRegWage
+	returnForcast.OvertimeWage = f.OvertimeWage + of.OvertimeWage
+	returnForcast.TotalBaseWage = f.TotalBaseWage + of.TotalBaseWage
+	returnForcast.PayrollTaxEstimate = f.PayrollTaxEstimate + of.PayrollTaxEstimate
+	returnForcast.Salary = f.Salary + of.Salary
+	return returnForcast
+}
+
 type StoreForcast struct {
-	StoreId                              int
-	ForcastId                            int `gorm:"primaryKey;autoIncrement"`
-	YearWeek                             string
-	FrontHouseTotalHours                 float64
-	FrontHouseTotalRegHours              float64
-	FrontHouseOverTimeHours              float64
-	FrontHouseSpreadofPay                float64
-	FrontHouseTotalRegWage               float64
-	FrontHouseOvertimeWage               float64
-	FrontHouseTotalBaseWage              float64
-	FrontHousePayrollTaxEstimate         float64
-	FrontHouseTotalForecastHourlyPayRate float64
-	FrontHouseSalary                     float64
-	BackHouseTotalHours                  float64
-	BackHouseTotalRegHours               float64
-	BackHouseOverTimeHours               float64
-	BackHouseSpreadofPay                 float64
-	BackHouseTotalRegWage                float64
-	BackHouseOvertimeWage                float64
-	BackHouseTotalBaseWage               float64
-	BackHousePayrollTaxEstimate          float64
-	BackHouseTotalForecastHourlyPayRate  float64
-	BackHouseSalary                      float64
+	StoreId           int
+	ForcastId         int `gorm:"primaryKey;autoIncrement"`
+	YearWeek          string
+	FrontHouseForcast *Forcast
+	BackHouseForcast  *Forcast
+	CombinedForcast   *Forcast
 }
 
 func minsToHoursConverter(mins int) float64 {
@@ -303,15 +324,35 @@ func GenerateEmployeeForcast(done chan EmployeeForcast, employeeId int, employee
 }
 
 func GenerateStoreForcast(employeeForcasts []EmployeeForcast) {
-
-	for forcast := range employeeForcasts {
-		employee, err := GetEmployee(forcast)
+	bohForcast := Forcast{}
+	fohForcast := Forcast{}
+	combinedForcast := Forcast{}
+	for _, forcast := range employeeForcasts {
+		var _forcast Forcast
+		employee, err := GetEmployee(forcast.EmployeeId)
 		if err != "" {
 			fmt.Print("bad)")
 		}
-		if contains(BackOfHousePositions, employee.Position) {
-
+		posType := positionType(employee.Position)
+		if posType == "boh" {
+			_forcast = bohForcast
+		} else {
+			_forcast = fohForcast
 		}
+
+		_forcast.TotalHours += forcast.TotalHours
+		_forcast.TotalRegHours += forcast.TotalRegularHours
+		_forcast.OverTimeHours += forcast.OverTimeHours
+		_forcast.SpreadofPay += forcast.SpreadOfPay
+		_forcast.TotalRegWage += forcast.TotalRegularWage
+		_forcast.OvertimeWage += forcast.OvertimeWage
+		_forcast.TotalBaseWage += forcast.TotalBaseWage
+		_forcast.PayrollTaxEstimate += forcast.PayrollTaxEstimated
+		_forcast.TotalForecastHourlyPayRate += forcast.GrandTotalPayrollForecast
+		_forcast.Salary += forcast.Salary
 	}
+
+	combinedForcast = bohForcast.combine(fohForcast)
+	StoreForcast
 
 }

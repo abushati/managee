@@ -179,6 +179,7 @@ func runForcast(storeId int, week int, year int) {
 	for result := range done {
 		fmt.Println("Received result:", result)
 	}
+
 	fmt.Printf("someFunction execution time: %s\n", elapsed)
 
 }
